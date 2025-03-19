@@ -1,0 +1,12 @@
+# Scale cut Planck 2018 to combine with ACT or SPT: high-ell, TT(l<1000) + TE(l<600) + EE(l<600) power spectrum likelihood (plik)
+
+path:
+clik_file: with_actdr6/T1000_E600_TTTEEE.clik
+# Aliases for automatic covariance matrix
+aliases: [plikHM_TTTEEE]
+# Speed in evaluations/second
+speed: 30
+
+params: !defaults [../base_classes/planck_calib, params_calib_temp, params_calib_pol, params_TT, params_TE, params_EE]
+
+prior: !defaults [prior_SZ]
