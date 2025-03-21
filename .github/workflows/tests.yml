@@ -10,10 +10,10 @@ env:
 
 jobs:
   should_run:
-    # only run on pushes that are not also part of PR
+    # only run on pushes that are not also part of PR, EXCEPT for master branch pushes (always run on master)
     runs-on: ubuntu-latest
     outputs:
-      run_tests: github.event_name == 'push' || ${{ steps.check.outputs.run_tests }}
+      run_tests: ${{ steps.check.outputs.run_tests }}
     steps:
       - name: Check if tests should run
         id: check
@@ -22,13 +22,22 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
-              state: 'open'
-            });
-            const shouldRun = prs.length === 0;
+            const ref = context.ref;
+            const isMasterPush = ref === 'refs/heads/master';
+            let shouldRun = false;
+
+            if (isMasterPush) {
+              shouldRun = true; // Always run on master pushes
+            } else {
+              // For other branches, check for open PRs
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+                state: 'open'
+              });
+              shouldRun = prs.length === 0; // Run if no open PRs for this branch
+            }
             core.setOutput('run_tests', shouldRun ? 'true' : 'false');
 
   tests:
@@ -47,7 +56,7 @@ jobs:
             os: ubuntu-latest
             python-version: 3.x
             mpi: openmpi
-            cobaya_skip: classy,polychord
+            cobaya_skip: classy, polychord
           - name: "OS X Python 3.8 (with classy)"
             os: macos-latest
             python-version: 3.8
@@ -96,7 +105,7 @@ jobs:
       - name: Install dependencies (pip)
         if: matrix.pydist != 'ANACONDA'
         run: |
-          pip install -r requirements.txt pytest-xdist pytest-cov flaky matplotlib coverage iminuit numba camb
+          pip install -r requirements.txt pytest-xdist pytest-cov flaky matplotlib coverage iminuit numba
 
       - name: Install mpi
         if: matrix.pydist != 'ANACONDA' && matrix.os != 'windows-latest'
@@ -117,13 +126,20 @@ jobs:
       #        key: ${{ env.COBAYA_INSTALL_SKIP }}
       #       enableCrossOsArchive: true
 
-
-      - name: Run cobaya install and tests
+      - name: Run cobaya (no cosmo) install and tests
         shell: bash -el {0}
         run: |
           coverage run --parallel-mode -m cobaya.install polychord --debug
           coverage run --parallel-mode -m pytest tests/ -n auto -k "not cosmo" --skip-not-installed --no-flaky-report
+
+      - name: Run cobaya cosmo install
+        shell: bash -el {0}
+        run: |
           coverage run --parallel-mode -m cobaya.install cosmo-tests --no-progress-bars --debug --skip-global
+
+      - name: Run cobaya cosmo tests
+        shell: bash -el {0}
+        run: |
           pytest tests/ --cov -vv -s -k "cosmo" -n 2 --skip-not-installed --no-flaky-report
 
       - name: Run MPI tests
