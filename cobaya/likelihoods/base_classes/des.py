@@ -60,6 +60,7 @@ from cobaya.functions import numba
 
 # DES data types
 def_DES_types = ['xip', 'xim', 'gammat', 'wtheta']
+DES_joint_linear_mask = [True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,False,True,True,False,False,False,False,True,True,False,False,False,False,True,True,True,False,False,False,True,True,False,False,False,False,False,False,False,False,False,False,False,False,True,True,False,False,False,False,False,False,True,True,True,False,False,True,False,False,True,True,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,True,False,False,False,False,False,False,False,True,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,True,True,True,True,True,True,False,False,True,True,True,True,True,True,True,False,False,False,True,True,True,True,True,True,False,False,False,False,False,True,True,True,True,True,True,False,False,False,False,False,False,True,True,True,True,True,False,False,False,False,False,False,False,False]
 
 _spline = InterpolatedUnivariateSpline
 
@@ -163,6 +164,7 @@ class DES(DataSetLikelihood):
     use_hankel: bool
     use_Weyl: bool
     l_max: int
+    linear_only = False
 
     def load_dataset_file(self, filename, dataset_params=None):
         self.l_max = self.l_max or int(50000 * self.acc)
@@ -186,6 +188,8 @@ class DES(DataSetLikelihood):
         self.initialize_postload()
 
     def init_params(self, ini):
+        if self.linear_only:
+            print('Linear_only = True. Be aware that this only works with the baseline 3x2pt DESY1 data with 547 datapoints.')
         self.indices = []
         self.used_indices = []
         self.used_items = []
@@ -405,14 +409,15 @@ class DES(DataSetLikelihood):
             "H0": None,
             "omegam": None,
             "Pk_interpolator": {
-                "z": self.zs_interp, "k_max": 15 * self.acc, "nonlinear": True,
+                "z": self.zs_interp, "k_max": 15 * self.acc, "nonlinear": True if not self.linear_only else False,
                 "vars_pairs": ([("delta_tot", "delta_tot")] +
-                               ([("Weyl", "Weyl")] if self.use_Weyl else []))},
+                               ([("Weyl", "Weyl")] if self.use_Weyl else []) + 
+                               ([("delta_tot", "Weyl")] if self.use_Weyl else []))},
             "comoving_radial_distance": {"z": self.zs},
             "Hubble": {"z": self.zs}}
 
     # noinspection PyUnboundLocalVariable
-    def get_theory(self, PKdelta, PKWeyl, bin_bias, shear_calibration_parameters,
+    def get_theory(self, PKdelta, PKWeyl, PKdeltaWeyl, bin_bias, shear_calibration_parameters,
                    intrinsic_alignment_A, intrinsic_alignment_alpha,
                    intrinsic_alignment_z0, wl_photoz_errors, lens_photoz_errors):
         h2 = (self.provider.get_param("H0") / 100) ** 2
@@ -455,7 +460,7 @@ class DES(DataSetLikelihood):
                 wq[b] = wq_b - Alignment_z * n_chi
 
             if PKWeyl is not None:
-                if 'gammat' in self.used_types:
+                if 'gammat' in self.used_types and PKdeltaWeyl is None:
                     raise LoggedError(self.log, "DES currently only supports Weyl "
                                                 "potential for lensing only")
                 qs = chis * wq
@@ -494,6 +499,24 @@ class DES(DataSetLikelihood):
                     tmplens[ix, :] = weight * PKWeyl.P(self.zs, k, grid=False)
         else:
             tmplens = tmp
+        
+        if PKdeltaWeyl is not None:
+            if numba:
+                tmpdeltalens = PKdeltaWeyl.P(self.zs, ks, grid=False)
+                _limber_PK_terms(tmpdeltalens, ks, dchifac, PKdeltaWeyl.kmax)
+            else:
+                tmpdeltalens = np.empty((ls_cl.shape[0], chis.shape[0]))
+                for ix, l in enumerate(ls_cl):
+                    k = (l + 0.5) / chis
+                    weight[:] = dchifac
+                    weight[k < 1e-4] = 0
+                    weight[k >= PKdeltaWeyl.kmax] = 0
+                    tmpdeltalens[ix, :] = weight * PKdeltaWeyl.P(self.zs, k, grid=False)
+            # sign matters for cross correlation
+            tmpdeltalens = -tmpdeltalens
+        else:
+            tmpdeltalens = tmp
+        
         corrs_th_p = np.empty((self.nzbins, self.nzbins), dtype=object)
         corrs_th_m = np.empty((self.nzbins, self.nzbins), dtype=object)
         corrs_th_w = np.empty((self.nwbins, self.nwbins), dtype=object)
@@ -514,7 +537,7 @@ class DES(DataSetLikelihood):
                                                                 ret_err=False) * fac
             if 'gammat' in self.used_types:
                 for (f1, f2) in self.bin_pairs[self.data_types.index('gammat')]:
-                    cl = _spline(ls_cl, np.dot(tmp, qgal[f1] * qs[f2]))
+                    cl = _spline(ls_cl, np.dot(tmpdeltalens, qgal[f1] * qs[f2]))
                     fac = (1 + shear_calibration_parameters[f2]) / 2 / np.pi
                     corrs_th_t[f1, f2] = self.hankel2.transform(
                         cl, self.theta_bins_radians, ret_err=False) * fac
@@ -536,7 +559,7 @@ class DES(DataSetLikelihood):
                     corrs_th_m[f1, f2] = np.dot(cl, j4s) * fac
             if 'gammat' in self.used_types:
                 for (f1, f2) in self.bin_pairs[self.data_types.index('gammat')]:
-                    cl = _spline(ls_cl, np.dot(tmp, qgal[f1] * qs[f2]))(ls_bessel)
+                    cl = _spline(ls_cl, np.dot(tmpdeltalens, qgal[f1] * qs[f2]))(ls_bessel)
                     corrs_th_t[f1, f2] = np.dot(cl, j2s) * (
                             1 + shear_calibration_parameters[f2])
             if 'wtheta' in self.used_types:
@@ -562,6 +585,8 @@ class DES(DataSetLikelihood):
     def chi_squared(self, theory, return_theory_vector=False):
         theory_vec = self.make_vector(theory)
         delta = self.data_vector - theory_vec
+        if self.linear_only:
+            delta[DES_joint_linear_mask] = 0
         chi2 = self.covinv.dot(delta).dot(delta)
         if return_theory_vector:
             return theory_vec, chi2
@@ -570,12 +595,18 @@ class DES(DataSetLikelihood):
 
     def logp(self, **params_values):
         PKdelta = self.provider.get_Pk_interpolator(("delta_tot", "delta_tot"),
-                                                    extrap_kmax=3000 * self.acc)
+                                                    extrap_kmax=3000 * self.acc,
+                                                    nonlinear=False if self.linear_only else True)
         if self.use_Weyl:
             PKWeyl = self.provider.get_Pk_interpolator(("Weyl", "Weyl"),
-                                                       extrap_kmax=3000 * self.acc)
+                                                       extrap_kmax=3000 * self.acc,
+                                                       nonlinear=False if self.linear_only else True)
+            PKdeltaWeyl = self.provider.get_Pk_interpolator(("delta_tot", "Weyl"),
+                                                       extrap_kmax=3000 * self.acc,
+                                                       nonlinear=False if self.linear_only else True)
         else:
             PKWeyl = None
+            PKdeltaWeyl = None
 
         wl_photoz_errors = [
             params_values.get(p, None) for p in
@@ -590,7 +621,7 @@ class DES(DataSetLikelihood):
             params_values.get(p, None) for p in
             ['DES_m1', 'DES_m2', 'DES_m3', 'DES_m4']]
         theory = self.get_theory(
-            PKdelta, PKWeyl,
+            PKdelta, PKWeyl, PKdeltaWeyl,
             bin_bias=bin_bias,
             wl_photoz_errors=wl_photoz_errors,
             lens_photoz_errors=lens_photoz_errors,
