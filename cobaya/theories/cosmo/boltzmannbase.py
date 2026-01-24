@@ -18,6 +18,11 @@ from cobaya.theory import Theory
 from cobaya.tools import check_2d, combine_1d, combine_2d, deepcopy_where_possible
 from cobaya.typing import InfoDict, empty_dict
 
+
+class PkCrossZeroError(Exception):
+    pass
+
+
 H_units_conv_factor = {"1/Mpc": 1, "km/s/Mpc": Const.c_km_s}
 
 
@@ -513,10 +518,11 @@ class BoltzmannBase(Theory):
         if log_p:
             pk = np.log(sign * pk)
         elif extrapolating:
-            raise LoggedError(
-                self.log,
-                "Cannot do log extrapolation with zero-crossing pk for %s, %s" % var_pair,
-            )
+            # raise LoggedError(
+            #     self.log,
+            #     "Cannot do log extrapolation with zero-crossing pk for %s, %s" % var_pair,
+            # )
+            raise PkCrossZeroError
         result = PowerSpectrumInterpolator(
             z,
             k,

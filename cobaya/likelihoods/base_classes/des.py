@@ -56,6 +56,7 @@ from cobaya.conventions import Const
 from cobaya.functions import numba
 from cobaya.likelihoods.base_classes.DataSetLikelihood import DataSetLikelihood
 from cobaya.log import LoggedError
+from cobaya.theories.cosmo.boltzmannbase import PkCrossZeroError
 
 # DES data types
 def_DES_types = ["xip", "xim", "gammat", "wtheta"]
@@ -702,19 +703,22 @@ class DES(DataSetLikelihood):
             return chi2
 
     def logp(self, **params_values):
-        PKdelta = self.provider.get_Pk_interpolator(
-            ("delta_tot", "delta_tot"), extrap_kmax=3000 * self.acc
-        )
-        if self.use_Weyl:
-            PKWeyl = self.provider.get_Pk_interpolator(
-                ("Weyl", "Weyl"), extrap_kmax=3000 * self.acc
+        try:
+            PKdelta = self.provider.get_Pk_interpolator(
+                ("delta_tot", "delta_tot"), extrap_kmax=3000 * self.acc
             )
-            PKdeltaWeyl = self.provider.get_Pk_interpolator(
-                ("delta_tot", "Weyl"), extrap_kmax=3000 * self.acc
-            )
-        else:
-            PKWeyl = None
-            PKdeltaWeyl = None
+            if self.use_Weyl:
+                PKWeyl = self.provider.get_Pk_interpolator(
+                    ("Weyl", "Weyl"), extrap_kmax=3000 * self.acc
+                )
+                PKdeltaWeyl = self.provider.get_Pk_interpolator(
+                    ("delta_tot", "Weyl"), extrap_kmax=3000 * self.acc
+                )
+            else:
+                PKWeyl = None
+                PKdeltaWeyl = None
+        except PkCrossZeroError:
+            return -np.inf
 
         wl_photoz_errors = [
             params_values.get(p, None)
