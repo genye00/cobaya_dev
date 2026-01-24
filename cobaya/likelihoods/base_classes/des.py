@@ -63,67 +63,131 @@ def_DES_types = ["xip", "xim", "gammat", "wtheta"]
 _spline = InterpolatedUnivariateSpline
 
 
-def get_def_cuts():  # pragma: no cover
+def get_def_cuts(linear=False):  # pragma: no cover
     ranges = {}
     for tp in def_DES_types:
         ranges[tp] = np.empty((6, 6), dtype=object)
-    ranges["xip"][1][1] = [7.195005, 250.0]
-    ranges["xip"][1][2] = [7.195005, 250.0]
-    ranges["xip"][1][3] = [5.715196, 250.0]
-    ranges["xip"][1][4] = [5.715196, 250.0]
-    ranges["xip"][2][1] = [7.195005, 250.0]
-    ranges["xip"][2][2] = [4.539741, 250.0]
-    ranges["xip"][2][3] = [4.539741, 250.0]
-    ranges["xip"][2][4] = [4.539741, 250.0]
-    ranges["xip"][3][1] = [5.715196, 250.0]
-    ranges["xip"][3][2] = [4.539741, 250.0]
-    ranges["xip"][3][3] = [3.606045, 250.0]
-    ranges["xip"][3][4] = [3.606045, 250.0]
-    ranges["xip"][4][1] = [5.715196, 250.0]
-    ranges["xip"][4][2] = [4.539741, 250.0]
-    ranges["xip"][4][3] = [3.606045, 250.0]
-    ranges["xip"][4][4] = [3.606045, 250.0]
-    ranges["xim"][1][1] = [90.579750, 250.0]
-    ranges["xim"][1][2] = [71.950053, 250.0]
-    ranges["xim"][1][3] = [71.950053, 250.0]
-    ranges["xim"][1][4] = [71.950053, 250.0]
-    ranges["xim"][2][1] = [71.950053, 250.0]
-    ranges["xim"][2][2] = [57.151958, 250.0]
-    ranges["xim"][2][3] = [57.151958, 250.0]
-    ranges["xim"][2][4] = [45.397414, 250.0]
-    ranges["xim"][3][1] = [71.950053, 250.0]
-    ranges["xim"][3][2] = [57.151958, 250.0]
-    ranges["xim"][3][3] = [45.397414, 250.0]
-    ranges["xim"][3][4] = [45.397414, 250.0]
-    ranges["xim"][4][1] = [71.950053, 250.0]
-    ranges["xim"][4][2] = [45.397414, 250.0]
-    ranges["xim"][4][3] = [45.397414, 250.0]
-    ranges["xim"][4][4] = [36.060448, 250.0]
-    ranges["gammat"][1][1] = [64.0, 250.0]
-    ranges["gammat"][1][2] = [64.0, 250.0]
-    ranges["gammat"][1][3] = [64.0, 250.0]
-    ranges["gammat"][1][4] = [64.0, 250.0]
-    ranges["gammat"][2][1] = [40.0, 250.0]
-    ranges["gammat"][2][2] = [40.0, 250.0]
-    ranges["gammat"][2][3] = [40.0, 250.0]
-    ranges["gammat"][2][4] = [40.0, 250.0]
-    ranges["gammat"][3][1] = [30.0, 250.0]
-    ranges["gammat"][3][2] = [30.0, 250.0]
-    ranges["gammat"][3][3] = [30.0, 250.0]
-    ranges["gammat"][3][4] = [30.0, 250.0]
-    ranges["gammat"][4][1] = [24.0, 250.0]
-    ranges["gammat"][4][2] = [24.0, 250.0]
-    ranges["gammat"][4][3] = [24.0, 250.0]
-    ranges["gammat"][4][4] = [24.0, 250.0]
-    ranges["gammat"][5][1] = [21.0, 250.0]
-    ranges["gammat"][5][2] = [21.0, 250.0]
-    ranges["gammat"][5][3] = [21.0, 250.0]
-    ranges["gammat"][5][4] = [21.0, 250.0]
-    ranges["wtheta"][1][1] = [43.0, 250.0]
-    ranges["wtheta"][2][2] = [27.0, 250.0]
-    ranges["wtheta"][3][3] = [20.0, 250.0]
-    ranges["wtheta"][4][4] = [16.0, 250.0]
-    ranges["wtheta"][5][5] = [14.0, 250.0]
+    if (linear):
+        # xip
+        ranges["xip"][1][1] = [25.0, 249.0]
+        ranges["xip"][1][2] = [31.0, 249.0]
+        ranges["xip"][1][3] = [31.0, 249.0]
+        ranges["xip"][1][4] = [31.0, 249.0]
+        ranges["xip"][2][2] = [25.0, 249.0]
+        ranges["xip"][2][3] = [25.0, 249.0]
+        ranges["xip"][2][4] = [25.0, 249.0]
+        ranges["xip"][3][3] = [20.0, 249.0]
+        ranges["xip"][3][4] = [20.0, 249.0]
+        ranges["xip"][4][4] = [20.0, 249.0]
+
+        # xim
+        ranges["xim"][1][1] = [202.0, 249.0]
+        ranges["xim"][1][2] = [999.0, 999.0]
+        ranges["xim"][1][3] = [999.0, 999.0]
+        ranges["xim"][1][4] = [999.0, 999.0]
+        ranges["xim"][2][2] = [999.0, 999.0]
+        ranges["xim"][2][3] = [999.0, 999.0]
+        ranges["xim"][2][4] = [999.0, 999.0]
+        ranges["xim"][3][3] = [999.0, 999.0]
+        ranges["xim"][3][4] = [999.0, 999.0]
+        ranges["xim"][4][4] = [202.0, 249.0]
+
+        # gammat
+        ranges["gammat"][1][1] = [78.0, 249.0]
+        ranges["gammat"][1][2] = [98.0, 249.0]
+        ranges["gammat"][1][3] = [98.0, 249.0]
+        ranges["gammat"][1][4] = [98.0, 249.0]
+
+        ranges["gammat"][2][1] = [31.0, 249.0]
+        ranges["gammat"][2][2] = [62.0, 249.0]
+        ranges["gammat"][2][3] = [62.0, 249.0]
+        ranges["gammat"][2][4] = [62.0, 249.0]
+
+        ranges["gammat"][3][1] = [31.0, 249.0]
+        ranges["gammat"][3][2] = [49.0, 249.0]
+        ranges["gammat"][3][3] = [62.0, 249.0]
+        ranges["gammat"][3][4] = [49.0, 249.0]
+
+        ranges["gammat"][4][1] = [39.0, 249.0]
+        ranges["gammat"][4][2] = [62.0, 249.0]
+        ranges["gammat"][4][3] = [62.0, 249.0]
+        ranges["gammat"][4][4] = [49.0, 249.0]
+
+        ranges["gammat"][5][1] = [999.0, 999.0]
+        ranges["gammat"][5][2] = [999.0, 999.0]
+        ranges["gammat"][5][3] = [999.0, 999.0]
+        ranges["gammat"][5][4] = [999.0, 999.0]
+
+        ranges["gammat"][6][1] = [999.0, 999.0]
+        ranges["gammat"][6][2] = [999.0, 999.0]
+        ranges["gammat"][6][3] = [999.0, 999.0]
+        ranges["gammat"][6][4] = [999.0, 999.0]
+
+        # wtheta
+        ranges["wtheta"][1][1] = [31.0, 197.0]
+        ranges["wtheta"][2][2] = [25.0, 62.0]
+        ranges["wtheta"][3][3] = [15.0, 39.0]
+        ranges["wtheta"][4][4] = [15.0, 31.0]
+        ranges["wtheta"][5][5] = [999.0, 999.0]
+        ranges["wtheta"][6][6] = [999.0, 999.0]
+    else:
+        ranges["xip"][1][1] = [7.195005, 250.0]
+        ranges["xip"][1][2] = [7.195005, 250.0]
+        ranges["xip"][1][3] = [5.715196, 250.0]
+        ranges["xip"][1][4] = [5.715196, 250.0]
+        ranges["xip"][2][1] = [7.195005, 250.0]
+        ranges["xip"][2][2] = [4.539741, 250.0]
+        ranges["xip"][2][3] = [4.539741, 250.0]
+        ranges["xip"][2][4] = [4.539741, 250.0]
+        ranges["xip"][3][1] = [5.715196, 250.0]
+        ranges["xip"][3][2] = [4.539741, 250.0]
+        ranges["xip"][3][3] = [3.606045, 250.0]
+        ranges["xip"][3][4] = [3.606045, 250.0]
+        ranges["xip"][4][1] = [5.715196, 250.0]
+        ranges["xip"][4][2] = [4.539741, 250.0]
+        ranges["xip"][4][3] = [3.606045, 250.0]
+        ranges["xip"][4][4] = [3.606045, 250.0]
+        ranges["xim"][1][1] = [90.579750, 250.0]
+        ranges["xim"][1][2] = [71.950053, 250.0]
+        ranges["xim"][1][3] = [71.950053, 250.0]
+        ranges["xim"][1][4] = [71.950053, 250.0]
+        ranges["xim"][2][1] = [71.950053, 250.0]
+        ranges["xim"][2][2] = [57.151958, 250.0]
+        ranges["xim"][2][3] = [57.151958, 250.0]
+        ranges["xim"][2][4] = [45.397414, 250.0]
+        ranges["xim"][3][1] = [71.950053, 250.0]
+        ranges["xim"][3][2] = [57.151958, 250.0]
+        ranges["xim"][3][3] = [45.397414, 250.0]
+        ranges["xim"][3][4] = [45.397414, 250.0]
+        ranges["xim"][4][1] = [71.950053, 250.0]
+        ranges["xim"][4][2] = [45.397414, 250.0]
+        ranges["xim"][4][3] = [45.397414, 250.0]
+        ranges["xim"][4][4] = [36.060448, 250.0]
+        ranges["gammat"][1][1] = [64.0, 250.0]
+        ranges["gammat"][1][2] = [64.0, 250.0]
+        ranges["gammat"][1][3] = [64.0, 250.0]
+        ranges["gammat"][1][4] = [64.0, 250.0]
+        ranges["gammat"][2][1] = [40.0, 250.0]
+        ranges["gammat"][2][2] = [40.0, 250.0]
+        ranges["gammat"][2][3] = [40.0, 250.0]
+        ranges["gammat"][2][4] = [40.0, 250.0]
+        ranges["gammat"][3][1] = [30.0, 250.0]
+        ranges["gammat"][3][2] = [30.0, 250.0]
+        ranges["gammat"][3][3] = [30.0, 250.0]
+        ranges["gammat"][3][4] = [30.0, 250.0]
+        ranges["gammat"][4][1] = [24.0, 250.0]
+        ranges["gammat"][4][2] = [24.0, 250.0]
+        ranges["gammat"][4][3] = [24.0, 250.0]
+        ranges["gammat"][4][4] = [24.0, 250.0]
+        ranges["gammat"][5][1] = [21.0, 250.0]
+        ranges["gammat"][5][2] = [21.0, 250.0]
+        ranges["gammat"][5][3] = [21.0, 250.0]
+        ranges["gammat"][5][4] = [21.0, 250.0]
+        ranges["wtheta"][1][1] = [43.0, 250.0]
+        ranges["wtheta"][2][2] = [27.0, 250.0]
+        ranges["wtheta"][3][3] = [20.0, 250.0]
+        ranges["wtheta"][4][4] = [16.0, 250.0]
+        ranges["wtheta"][5][5] = [14.0, 250.0]
     for tp in def_DES_types:
         ranges[tp] = ranges[tp][1:, 1:]
     return ranges
@@ -161,6 +225,7 @@ class DES(DataSetLikelihood):
     binned_bessels: bool
     use_hankel: bool
     use_Weyl: bool
+    linear_only = False
     l_max: int
 
     def load_dataset_file(self, filename, dataset_params=None):
@@ -256,7 +321,7 @@ class DES(DataSetLikelihood):
         import astropy.io.fits as fits  # type: ignore
 
         if ranges is None:
-            ranges = get_def_cuts()
+            ranges = get_def_cuts(linear=self.linear_only)
         hdulist = fits.open(filename)
         self.indices = []
         self.intrinsic_alignment_model = "DES1YR"
@@ -430,10 +495,10 @@ class DES(DataSetLikelihood):
             "Pk_interpolator": {
                 "z": self.zs_interp,
                 "k_max": 15 * self.acc,
-                "nonlinear": True,
+                "nonlinear": not self.linear_only,
                 "vars_pairs": (
                     [("delta_tot", "delta_tot")]
-                    + ([("Weyl", "Weyl")] if self.use_Weyl else [])
+                    + ([("Weyl", "Weyl"), ("delta_tot", "Weyl")] if self.use_Weyl else [])
                 ),
             },
             "comoving_radial_distance": {"z": self.zs},
@@ -444,6 +509,7 @@ class DES(DataSetLikelihood):
         self,
         PKdelta,
         PKWeyl,
+        PKdeltaWeyl,
         bin_bias,
         shear_calibration_parameters,
         intrinsic_alignment_A,
@@ -498,11 +564,11 @@ class DES(DataSetLikelihood):
                 wq[b] = wq_b - Alignment_z * n_chi
 
             if PKWeyl is not None:
-                if "gammat" in self.used_types:
-                    raise LoggedError(
-                        self.log,
-                        "DES currently only supports Weyl potential for lensing only",
-                    )
+                # if "gammat" in self.used_types:
+                #     raise LoggedError(
+                #         self.log,
+                #         "DES currently only supports Weyl potential for lensing only",
+                #     )
                 qs = chis * wq
             else:
                 qs = 3 * omegam * h2 * (1e5 / c) ** 2 * chis * (1 + self.zs) / 2 * wq
@@ -534,16 +600,21 @@ class DES(DataSetLikelihood):
             if numba:
                 tmplens = PKWeyl.P(self.zs, ks, grid=False)
                 _limber_PK_terms(tmplens, ks, dchifac, PKWeyl.kmax)
+                tmpdeltalens = PKdeltaWeyl.P(self.zs, ks, grid=False)
+                _limber_PK_terms(tmpdeltalens, ks, dchifac, PKdeltaWeyl.kmax)
             else:
                 tmplens = np.empty((ls_cl.shape[0], chis.shape[0]))
+                tmpdeltalens = np.empty((ls_cl.shape[0], chis.shape[0]))
                 for ix, ell in enumerate(ls_cl):
                     k = (ell + 0.5) / chis
                     weight[:] = dchifac
                     weight[k < 1e-4] = 0
                     weight[k >= PKWeyl.kmax] = 0
                     tmplens[ix, :] = weight * PKWeyl.P(self.zs, k, grid=False)
+                    tmpdeltalens[ix, :] = weight * PKdeltaWeyl.P(self.zs, k, grid=False)
         else:
             tmplens = tmp
+            tmpdeltalens = tmp
         corrs_th_p = np.empty((self.nzbins, self.nzbins), dtype=object)
         corrs_th_m = np.empty((self.nzbins, self.nzbins), dtype=object)
         corrs_th_w = np.empty((self.nwbins, self.nwbins), dtype=object)
@@ -570,7 +641,7 @@ class DES(DataSetLikelihood):
                     )
             if "gammat" in self.used_types:
                 for f1, f2 in self.bin_pairs[self.data_types.index("gammat")]:
-                    cl = _spline(ls_cl, np.dot(tmp, qgal[f1] * qs[f2]))
+                    cl = _spline(ls_cl, np.dot(tmpdeltalens, qgal[f1] * qs[f2]))
                     fac = (1 + shear_calibration_parameters[f2]) / 2 / np.pi
                     corrs_th_t[f1, f2] = (
                         self.hankel2.transform(cl, self.theta_bins_radians, ret_err=False)
@@ -597,7 +668,7 @@ class DES(DataSetLikelihood):
                     corrs_th_m[f1, f2] = np.dot(cl, j4s) * fac
             if "gammat" in self.used_types:
                 for f1, f2 in self.bin_pairs[self.data_types.index("gammat")]:
-                    cl = _spline(ls_cl, np.dot(tmp, qgal[f1] * qs[f2]))(ls_bessel)
+                    cl = _spline(ls_cl, np.dot(tmpdeltalens, qgal[f1] * qs[f2]))(ls_bessel)
                     corrs_th_t[f1, f2] = np.dot(cl, j2s) * (
                         1 + shear_calibration_parameters[f2]
                     )
@@ -638,8 +709,12 @@ class DES(DataSetLikelihood):
             PKWeyl = self.provider.get_Pk_interpolator(
                 ("Weyl", "Weyl"), extrap_kmax=3000 * self.acc
             )
+            PKdeltaWeyl = self.provider.get_Pk_interpolator(
+                ("delta_tot", "Weyl"), extrap_kmax=3000 * self.acc
+            )
         else:
             PKWeyl = None
+            PKdeltaWeyl = None
 
         wl_photoz_errors = [
             params_values.get(p, None)
@@ -659,6 +734,7 @@ class DES(DataSetLikelihood):
         theory = self.get_theory(
             PKdelta,
             PKWeyl,
+            PKdeltaWeyl,
             bin_bias=bin_bias,
             wl_photoz_errors=wl_photoz_errors,
             lens_photoz_errors=lens_photoz_errors,
